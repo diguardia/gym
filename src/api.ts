@@ -1,19 +1,17 @@
 import { getApiToken, getApiUrl } from './config';
-import type { Dia, Ejercicio, LogResponse, Resultado } from './types';
+import type { Ejercicio, LogResponse, Resultado } from './types';
 
-function cacheKey(dia: Dia) {
-  return `gym_cache_${dia}`;
-}
+const CACHE_KEY = 'gym_cache_todos';
 
-export async function fetchEjercicios(dia: Dia): Promise<Ejercicio[]> {
-  const url = `${getApiUrl()}?action=exercises&dia=${dia}`;
+export async function fetchTodosEjercicios(): Promise<Ejercicio[]> {
+  const url = `${getApiUrl()}?action=exercises`;
   try {
     const res = await fetch(url);
     const data = (await res.json()) as Ejercicio[];
-    localStorage.setItem(cacheKey(dia), JSON.stringify(data));
+    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
     return data;
   } catch (err) {
-    const cached = localStorage.getItem(cacheKey(dia));
+    const cached = localStorage.getItem(CACHE_KEY);
     if (cached) return JSON.parse(cached) as Ejercicio[];
     throw err;
   }

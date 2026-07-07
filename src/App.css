@@ -91,6 +91,25 @@ button.primary:disabled {
   cursor: pointer;
 }
 
+.day-button-suggested {
+  border-color: #2f81f7;
+}
+
+.suggestion-banner {
+  text-align: left;
+  padding: 1rem;
+  border-radius: 0.9rem;
+  border: none;
+  background: #1e3a5f;
+  color: #cfe2ff;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.suggestion-banner strong {
+  color: white;
+}
+
 .exercise-list {
   display: flex;
   flex-direction: column;
@@ -108,6 +127,10 @@ button.primary:disabled {
   background: #232830;
   color: white;
   cursor: pointer;
+}
+
+.exercise-card-done {
+  opacity: 0.55;
 }
 
 .exercise-name {

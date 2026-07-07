@@ -1,12 +1,13 @@
-import { useEffect, useState } from 'react';
-import { fetchEjercicios } from '../api';
+import { DIA_LABELS } from '../dias';
 import type { Dia, Ejercicio } from '../types';
 
 interface Props {
   dia: Dia;
+  ejercicios: Ejercicio[] | null;
+  error: string | null;
+  hechosHoy: Set<string>;
   onBack: () => void;
   onSelect: (ejercicio: Ejercicio) => void;
-  refreshToken: number;
 }
 
 function targetLabel(e: Ejercicio): string {
@@ -15,17 +16,15 @@ function targetLabel(e: Ejercicio): string {
   return reps;
 }
 
-export function ExerciseList({ dia, onBack, onSelect, refreshToken }: Props) {
-  const [ejercicios, setEjercicios] = useState<Ejercicio[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    setEjercicios(null);
-    setError(null);
-    fetchEjercicios(dia)
-      .then(setEjercicios)
-      .catch(() => setError('No se pudo cargar. Revisá la configuración o tu conexión.'));
-  }, [dia, refreshToken]);
+export function ExerciseList({ dia, ejercicios, error, hechosHoy, onBack, onSelect }: Props) {
+  const delDia = ejercicios?.filter((e) => e.dia === dia) ?? null;
+  const ordenados = delDia
+    ? [...delDia].sort((a, b) => {
+        const aHecho = hechosHoy.has(a.ejercicio) ? 1 : 0;
+        const bHecho = hechosHoy.has(b.ejercicio) ? 1 : 0;
+        return aHecho - bHecho;
+      })
+    : null;
 
   return (
     <div className="screen">
@@ -33,17 +32,30 @@ export function ExerciseList({ dia, onBack, onSelect, refreshToken }: Props) {
         <button className="icon-button" onClick={onBack} aria-label="Volver">
           ←
         </button>
-        <h1>Día {dia}</h1>
+        <h1>{DIA_LABELS[dia]}</h1>
       </div>
       {error && <p className="error">{error}</p>}
-      {!error && !ejercicios && <p className="hint">Cargando...</p>}
+      {!error && !ordenados && <p className="hint">Cargando...</p>}
       <div className="exercise-list">
-        {ejercicios?.map((e) => (
-          <button key={e.ejercicio} className="exercise-card" onClick={() => onSelect(e)}>
-            <span className="exercise-name">{e.ejercicio}</span>
-            <span className="exercise-target">{targetLabel(e)}</span>
-          </button>
-        ))}
+        {ordenados?.map((e) => {
+          const hecho = hechosHoy.has(e.ejercicio);
+          return (
+            <button
+              key={e.ejercicio}
+              className={`exercise-card${hecho ? ' exercise-card-done' : ''}`}
+              onClick={() => onSelect(e)}
+            >
+              <span className="exercise-name">
+                {hecho && '✓ '}
+                {e.ejercicio}
+              </span>
+              <span className="exercise-target">
+                {hecho ? 'Hecho hoy · ' : ''}
+                {targetLabel(e)}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
